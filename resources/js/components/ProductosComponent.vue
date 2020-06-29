@@ -77,17 +77,28 @@ export default {
         agregar(){
 
             if(this.producto.nombre.trim() === ''||this.producto.descripcion.trim() === '' || this.producto.precio.trim() ==='' || this.producto.category_id.trim() === ''){
-                alert('Debes completar todos los campos antes de guardar');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Los campos no pueden estar vacios!', 
+                })
                 return;
             }
 
             const productoNuevo = this.producto//Guardamos el producto en el producto agregado
-            this.producto = {nombre: '', descripcion: '', precio: '', category_id: ''}//Ponemos en blaco los inputs
+            this.producto = {nombre: '', descripcion: '', precio: '', category_id: ''}//Ponemos en blanco los inputs
 
             axios.post('/products', productoNuevo)//Peticion post para agregar productos:
             .then((res) => {
                 const productoServidor = res.data;
                 this.productos.push(productoServidor);
+                Swal.fire({
+                    position: 'center',
+                    icon: 'success',
+                    title: 'Producto agregado con éxito!',
+                    showConfirmButton: false,
+                    timer: 2500
+                })
             });
                
         },
@@ -107,23 +118,41 @@ export default {
                 this.editar = false;
                 const index = this.productos.findIndex(item => item.id === producto.id);
                 this.productos[index] = res.data;
+                Swal.fire({
+                    position: 'center',
+                    icon: 'success',
+                    title: 'Producto actualizado con éxito!',
+                    showConfirmButton: false,
+                    timer: 2500
+                })
 
                 this.producto = {nombre:'', descripcion:'', precio:'', category_id:''}
 
-                axios.get('/products')
-                .then(res=>{
-                    this.productos = res.data;
-                })
+                this.obtenerProductos();
             })
         },
         eliminarProducto(producto, index){
-            const confirmacion = confirm(`Eliminar Producto: ${producto.nombre}`);
-            if(confirmacion){
-                axios.delete(`/products/${producto.id}`)
-                .then(()=>{
-                    this.productos.splice(index, 1);//Eliminamos el producto del arreglo.
-                })
-            }
+            Swal.fire({
+                title: '¿Estas seguro?',
+                text: "El producto se eliminará!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminar!'
+                }).then((result) => {
+                    if (result.value) {
+                        axios.delete(`/products/${producto.id}`)
+                        .then(()=>{
+                            this.productos.splice(index, 1);//Eliminamos el producto del arreglo.
+                        })
+                        Swal.fire(
+                            'Eliminado!',
+                            'El producto ha sido eliminado.',
+                            'success'
+                        )
+                    }
+            })
         },
          cancelarEdicion(){
             this.editar = false;

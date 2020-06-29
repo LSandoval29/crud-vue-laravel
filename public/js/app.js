@@ -2026,7 +2026,11 @@ __webpack_require__.r(__webpack_exports__);
       var _this2 = this;
 
       if (this.producto.nombre.trim() === '' || this.producto.descripcion.trim() === '' || this.producto.precio.trim() === '' || this.producto.category_id.trim() === '') {
-        alert('Debes completar todos los campos antes de guardar');
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Los campos no pueden estar vacios!'
+        });
         return;
       }
 
@@ -2037,13 +2041,21 @@ __webpack_require__.r(__webpack_exports__);
         descripcion: '',
         precio: '',
         category_id: ''
-      }; //Ponemos en blaco los inputs
+      }; //Ponemos en blanco los inputs
 
       axios.post('/products', productoNuevo) //Peticion post para agregar productos:
       .then(function (res) {
         var productoServidor = res.data;
 
         _this2.productos.push(productoServidor);
+
+        Swal.fire({
+          position: 'center',
+          icon: 'success',
+          title: 'Producto agregado con éxito!',
+          showConfirmButton: false,
+          timer: 2500
+        });
       });
     },
     editarFormulario: function editarFormulario(item) {
@@ -2071,28 +2083,43 @@ __webpack_require__.r(__webpack_exports__);
         });
 
         _this3.productos[index] = res.data;
+        Swal.fire({
+          position: 'center',
+          icon: 'success',
+          title: 'Producto actualizado con éxito!',
+          showConfirmButton: false,
+          timer: 2500
+        });
         _this3.producto = {
           nombre: '',
           descripcion: '',
           precio: '',
           category_id: ''
         };
-        axios.get('/products').then(function (res) {
-          _this3.productos = res.data;
-        });
+
+        _this3.obtenerProductos();
       });
     },
     eliminarProducto: function eliminarProducto(producto, index) {
       var _this4 = this;
 
-      var confirmacion = confirm("Eliminar Producto: ".concat(producto.nombre));
+      Swal.fire({
+        title: '¿Estas seguro?',
+        text: "El producto se eliminará!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminar!'
+      }).then(function (result) {
+        if (result.value) {
+          axios["delete"]("/products/".concat(producto.id)).then(function () {
+            _this4.productos.splice(index, 1); //Eliminamos el producto del arreglo.
 
-      if (confirmacion) {
-        axios["delete"]("/products/".concat(producto.id)).then(function () {
-          _this4.productos.splice(index, 1); //Eliminamos el producto del arreglo.
-
-        });
-      }
+          });
+          Swal.fire('Eliminado!', 'El producto ha sido eliminado.', 'success');
+        }
+      });
     },
     cancelarEdicion: function cancelarEdicion() {
       this.editar = false;
