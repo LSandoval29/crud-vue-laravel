@@ -15,7 +15,7 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         if($request->ajax()){
-           $productos = Producto::All();
+           $productos = Producto::paginate(3);
            return $productos;
         }else{
             return view('home');
@@ -40,14 +40,13 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        $product = new Producto(); 
-        $product->nombre = $request->nombre;   
-        $product->descripcion = $request->descripcion; 
-        $product->precio = $request->precio;
-        $product->category_id = $request->category_id;
-        $product->save();
-        
-        return $product;
+        $productos = Producto::create($request->all());
+
+        if($productos){
+            return $productos;
+         }else{
+             return "Error";
+         }
     }
 
     /**
